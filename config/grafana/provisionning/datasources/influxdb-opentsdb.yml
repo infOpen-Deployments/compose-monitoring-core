@@ -1,0 +1,16 @@
+---
+
+apiVersion: 1
+
+deleteDatasources:
+  - name: 'InfluxDB - Opentsdb'
+    orgId: 1
+
+datasources:
+  - name: 'InfluxDB - Opentsdb'
+    type: 'influxdb'
+    access: 'proxy'
+    database: 'opentsdb'
+    user: ''
+    password: ''
+    url: 'http://influxdb:8086'

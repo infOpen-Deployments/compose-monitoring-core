@@ -1,0 +1,338 @@
+---
+
+version: '3'
+
+networks:
+  monitoring_core: {}
+  prometheus_servers: {}
+  services:
+    external:
+      name: 'services'
+
+volumes:
+  alertmanager_data: {}
+  chronograf_data: {}
+  grafana_data: {}
+  influxdb_data: {}
+  prometheus_data: {}
+  postgres_data: {}
+
+services:
+  alertmanager:
+    image: 'bitnami/alertmanager:latest'
+    restart: 'unless-stopped'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    expose:
+      - 9093
+    volumes:
+      - 'alertmanager_data:/alertmanager'
+      - './config/alertmanager/config.yml:/etc/alertmanager/config.yml:ro'
+      - '/etc/ssl/certs:/etc/ssl/certs:ro'
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://127.0.0.1:9093'
+    networks:
+      - 'monitoring_core'
+      - 'services'
+
+  blackbox_exporter:
+    image: 'prom/blackbox-exporter:v0.12.0'
+    restart: 'unless-stopped'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    expose:
+      - 9115
+    ports:
+        - "${LISTEN_IP_ADDRESS}:9115:9115"
+    volumes:
+      - './config/blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml:ro'
+    networks:
+      - 'monitoring_core'
+      - 'services'
+
+  chronograf:
+    image: 'chronograf:1.6.0'
+    command:
+      - '--influxdb-url=http://influxdb:8086'
+    volumes:
+      - 'chronograf_data:/var/lib/chronograf'
+    restart: 'unless-stopped'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    expose:
+      - 8888
+    networks:
+      - 'monitoring_core'
+      - 'services'
+
+  postgres:
+    image: 'postgres:10.2-alpine'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    restart: 'unless-stopped'
+    volumes:
+      - 'postgres_data:/var/lib/postgresql/data'
+    networks:
+      - 'monitoring_core'
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+  backup:
+    build:
+      context: './docker/backup'
+    restart: 'unless-stopped'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    networks:
+      - 'monitoring_core'
+    volumes:
+      - './backup.sh:/backup.sh'
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - SERVICE_NAME=${SERVICE_NAME}
+      - FTP_HOST=${FTP_HOST}
+      - FTP_USER=${FTP_USER}
+      - FTP_PASSWORD=${FTP_PASSWORD}
+
+  grafana:
+    image: 'grafana/grafana:5.3.0'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    volumes:
+      - 'grafana_data:/var/lib/grafana'
+      - './config/grafana/ldap/ldap.toml:/etc/grafana/ldap.toml'
+      - './config/grafana/provisionning/datasources:/etc/grafana/provisioning/datasources'
+      - './config/grafana/provisionning/dashboards:/etc/grafana/provisioning/dashboards'
+      - './config/grafana/dashboards:/var/lib/grafana/dashboards'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MongoDB_ClusterSummary.json:/var/lib/grafana/dashboards/databases/MongoDB_Cluster_Summary.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MongoDB_InMemory.json:/var/lib/grafana/dashboards/databases/MongoDB_InMemory.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MongoDB_MMAPv1.json:/var/lib/grafana/dashboards/databases/MongoDB_MMAPv1.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MongoDB_Overview.json:/var/lib/grafana/dashboards/databases/MongoDB_Overview.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MongoDB_ReplSet.json:/var/lib/grafana/dashboards/databases/MongoDB_ReplSet.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MongoDB_RocksDB.json:/var/lib/grafana/dashboards/databases/MongoDB_RocksDB.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MongoDB_WiredTiger.json:/var/lib/grafana/dashboards/databases/MongoDB_WiredTiger.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/Summary_Dashboard.json:/var/lib/grafana/dashboards/databases/Summary_Dashboard.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_Command_Handler_Counters_Compare.json:/var/lib/grafana/dashboards/databases/MySQL_Command_Handler_Counters_Compare.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_InnoDB_Compression.json:/var/lib/grafana/dashboards/databases/MySQL_InnoDB_Compression.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_InnoDB_Metrics_Advanced.json:/var/lib/grafana/dashboards/databases/MySQL_InnoDB_Metrics_Advanced.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_InnoDB_Metrics.json:/var/lib/grafana/dashboards/databases/MySQL_InnoDB_Metrics.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_MyISAM_Aria_Metrics.json:/var/lib/grafana/dashboards/databases/MySQL_MyISAM_Aria_Metrics.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_MyRocks_Metrics.json:/var/lib/grafana/dashboards/databases/MySQL_MyRocks_Metrics.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_Overview.json:/var/lib/grafana/dashboards/databases/MySQL_Overview.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_Performance_Schema.json:/var/lib/grafana/dashboards/databases/MySQL_Performance_Schema.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_Performance_Schema_Wait_Event_Analyses.json:/var/lib/grafana/dashboards/databases/MySQL_Performance_Schema_Wait_Event_Analyses.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_Query_Response_Time.json:/var/lib/grafana/dashboards/databases/MySQL_Query_Response_Time.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_Replication.json:/var/lib/grafana/dashboards/databases/MySQL_Replication.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_Table_Statistics.json:/var/lib/grafana/dashboards/databases/MySQL_Table_Statistics.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_TokuDB_Metrics.json:/var/lib/grafana/dashboards/databases/MySQL_TokuDB_Metrics.json'
+      - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_User_Statistics.json:/var/lib/grafana/dashboards/databases/MySQL_User_Statistics.json'
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+      - GF_AUTH_DISABLE_SIGNOUT_MENU=false
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_LDAP_ENABLED=true
+      - GF_AUTH_LDAP_CONFIG_FILE=/etc/grafana/ldap.toml
+      - GF_AUTH_LDAP_ALLOW_SIGN_UP=true
+      - GF_DATABASE_TYPE=postgres
+      - GF_DATABASE_HOST=postgres:5432
+      - GF_DATABASE_NAME=${POSTGRES_DB}
+      - GF_DATABASE_USER=${POSTGRES_USER}
+      - GF_DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel,grafana-worldmap-panel,percona-percona-app,stagemonitor-elasticsearch-app,btplc-alarm-box-panel,novalabs-annotations-panel,grafana-azure-monitor-datasource,digiapulssi-breadcrumb-panel,jdbranham-diagram-panel,natel-discrete-panel,ddurieux-glpi-app,natel-influx-admin-panel,grafana-kubernetes-app,camptocamp-prometheus-alertmanager-datasource,fzakaria-simple-annotations-datasource,grafana-simple-json-datasource
+    restart: 'unless-stopped'
+    expose:
+      - 3000
+    networks:
+      - 'monitoring_core'
+      - 'services'
+
+  influxdb:
+    image: 'influxdb:1.6.0'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    restart: 'unless-stopped'
+    expose:
+      - 4242
+      - 8086
+    volumes:
+      - 'influxdb_data:/var/lib/influxdb'
+      - './config/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf'
+    command:
+      - 'influxd'
+      - '-config'
+      - '/etc/influxdb/influxdb.conf'
+    environment:
+      INFLUXDB_DB: 'prometheus'
+    networks:
+      - 'monitoring_core'
+
+  influxdb_exporter:
+    image: 'carlpett/influxdb_stats_exporter:latest'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    command:
+      - '--influx.url=http://influxdb:8086'
+    restart: 'unless-stopped'
+    expose:
+      - 9424
+    ports:
+      - "${LISTEN_IP_ADDRESS}:9424:9424"
+    networks:
+      - 'monitoring_core'
+
+  prometheus_core:
+    image: 'prom/prometheus:v2.3.2'
+    command:
+      - '--config.file=/etc/prometheus/prometheus-core.yml'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=http://127.0.0.1:9090'
+    restart: 'unless-stopped'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    expose:
+      - 9090
+    networks:
+      monitoring_core:
+        aliases:
+          - 'monitoring_core.prometheus'
+      prometheus_servers:
+        aliases:
+          - 'prometheus_servers.core'
+      services:
+        aliases:
+          - 'services.prometheus'
+    volumes:
+      - './config/prometheus/:/etc/prometheus/'
+
+  prometheus_databases:
+    image: 'prom/prometheus:v2.3.2'
+    command:
+      - '--config.file=/etc/prometheus/prometheus-databases.yml'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=http://0.0.0.0:9090'
+    restart: 'unless-stopped'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    expose:
+      - 9090
+    networks:
+      monitoring_core:
+        aliases:
+          - 'prometheus_servers.databases'
+      prometheus_servers:
+        aliases:
+          - 'prometheus_servers.databases'
+    volumes:
+      - './config/prometheus/:/etc/prometheus/'
+
+  prometheus_nodes:
+    image: 'prom/prometheus:v2.3.2'
+    command:
+      - '--config.file=/etc/prometheus/prometheus-nodes.yml'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=http://0.0.0.0:9090'
+    restart: 'unless-stopped'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    expose:
+      - 9090
+    networks:
+      monitoring_core:
+        aliases:
+          - 'prometheus_servers.nodes'
+      prometheus_servers:
+        aliases:
+          - 'prometheus_servers.nodes'
+    volumes:
+      - './config/prometheus/:/etc/prometheus/'
+      - '/proc:/host/proc:ro'
+      - '/sys:/host/sys:ro'
+      - '/:/rootfs:ro'
+
+  prometheus_services:
+    image: 'prom/prometheus:v2.3.2'
+    command:
+      - '--config.file=/etc/prometheus/prometheus-services.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: 'unless-stopped'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    expose:
+      - 9090
+    networks:
+      monitoring_core:
+        aliases:
+          - 'prometheus_servers.services'
+      prometheus_servers:
+        aliases:
+          - 'prometheus_servers.services'
+    volumes:
+      - './config/prometheus/:/etc/prometheus/'
+
+  push_gateway:
+    image: 'prom/pushgateway:v0.5.2'
+    restart: 'unless-stopped'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '5'
+    expose:
+      - 9091
+    ports:
+      - "${LISTEN_IP_ADDRESS}:9091:9091"
+    networks:
+      - 'monitoring_core'
+      - 'services'

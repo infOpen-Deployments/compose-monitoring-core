@@ -1,0 +1,16 @@
+---
+
+apiVersion: 1
+
+deleteDatasources:
+  - name: 'InfluxDB - Internal'
+    orgId: 1
+
+datasources:
+  - name: 'InfluxDB - Internal'
+    type: 'influxdb'
+    access: 'proxy'
+    database: '_internal'
+    user: ''
+    password: ''
+    url: 'http://influxdb:8086'

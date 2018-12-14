@@ -1,0 +1,32 @@
+---
+
+apiVersion: 1
+
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://monitoring_core.prometheus:9090
+    password: ''
+    user: ''
+    database:
+    basicAuth: True
+    basicAuthUser: admin
+    basicAuthPassword: foobar
+    withCredentials: False
+    isDefault: True
+    jsonData:
+       graphiteVersion: '1.1'
+       tlsAuth: False
+       tlsAuthWithCACert: False
+    secureJsonData:
+      tlsCACert: ''
+      tlsClientCert: ''
+      tlsClientKey: ''
+    version: 1
+    editable: False
