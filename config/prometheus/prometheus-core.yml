@@ -1,0 +1,34 @@
+---
+
+global:
+  scrape_interval: '10s'
+  evaluation_interval: '10s'
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: ['alertmanager:9093']
+
+remote_read:
+  - url: "http://influxdb:8086/api/v1/prom/read?db=prometheus"
+
+remote_write:
+  - url: "http://influxdb:8086/api/v1/prom/write?db=prometheus"
+
+rule_files:
+  - '/etc/prometheus/rules/common/*'
+  - '/etc/prometheus/rules/customer/*'
+
+scrape_configs:
+  - job_name: 'federate'
+    scrape_interval: 15s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job =~ ".+"}'
+    static_configs:
+      - targets:
+          - 'prometheus_servers.databases:9090'
+          - 'prometheus_servers.nodes:9090'
+          - 'prometheus_servers.services:9090'

@@ -1,0 +1,12 @@
+---
+
+apiVersion: 1
+providers:
+  - name: 'Databases'
+    orgId: 1
+    folder: 'Databases'
+    type: 'file'
+    disableDeletion: True
+    editable: False
+    options:
+      path: '/var/lib/grafana/dashboards/databases'

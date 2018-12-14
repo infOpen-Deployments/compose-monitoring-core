@@ -1,0 +1,12 @@
+---
+
+apiVersion: 1
+providers:
+  - name: 'Grafana'
+    orgId: 1
+    folder: 'Grafana'
+    type: 'file'
+    disableDeletion: True
+    editable: False
+    options:
+      path: '/var/lib/grafana/dashboards/grafana'

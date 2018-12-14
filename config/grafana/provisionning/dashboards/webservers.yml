@@ -1,0 +1,12 @@
+---
+
+apiVersion: 1
+providers:
+  - name: 'Web servers'
+    orgId: 1
+    folder: 'Webservers'
+    type: 'file'
+    disableDeletion: True
+    editable: False
+    options:
+      path: '/var/lib/grafana/dashboards/webservers'

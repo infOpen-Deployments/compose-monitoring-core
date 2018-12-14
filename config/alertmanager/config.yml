@@ -1,0 +1,31 @@
+---
+
+global:
+  smtp_smarthost: 'smtp.foo.bar:587'
+  smtp_from: 'Foobar Monitoring <monitoring@me.foo.bar>'
+  smtp_auth_username: 'apikey'
+  smtp_auth_password: 'password'
+  smtp_require_tls: true
+
+templates:
+  - '/etc/alertmanager/template/*.tmpl'
+
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: '30s'
+  group_interval: '1m'
+  repeat_interval: '2h'
+  receiver: 'foobar'
+  routes: []
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+receivers:
+  - name: 'foobar'
+    email_configs:
+      - to: 'foo@bar.org'
