@@ -116,7 +116,7 @@ services:
       - FTP_PASSWORD=${FTP_PASSWORD}
 
   grafana:
-    image: 'grafana/grafana:5.4.2'
+    image: 'grafana/grafana:5.3.4'
     logging:
       driver: 'json-file'
       options:
