@@ -1,0 +1,1 @@
+15 3 * * * root bash -c '. /root/project_env.sh && bash /backup.sh' >> /var/log/cron.log 2>&1
