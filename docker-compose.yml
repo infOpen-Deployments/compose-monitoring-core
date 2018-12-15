@@ -41,7 +41,7 @@ services:
       - 'services'
 
   blackbox_exporter:
-    image: 'prom/blackbox-exporter:v0.12.0'
+    image: 'prom/blackbox-exporter:v0.13.0'
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -59,7 +59,7 @@ services:
       - 'services'
 
   chronograf:
-    image: 'chronograf:1.6.0'
+    image: 'chronograf:1.7.4'
     command:
       - '--influxdb-url=http://influxdb:8086'
     volumes:
@@ -116,7 +116,7 @@ services:
       - FTP_PASSWORD=${FTP_PASSWORD}
 
   grafana:
-    image: 'grafana/grafana:5.3.0'
+    image: 'grafana/grafana:5.4.2'
     logging:
       driver: 'json-file'
       options:
@@ -172,7 +172,7 @@ services:
       - 'services'
 
   influxdb:
-    image: 'influxdb:1.6.0'
+    image: 'influxdb:1.7.2'
     logging:
       driver: 'json-file'
       options:
@@ -212,7 +212,7 @@ services:
       - 'monitoring_core'
 
   prometheus_core:
-    image: 'prom/prometheus:v2.3.2'
+    image: 'prom/prometheus:v2.5.0'
     command:
       - '--config.file=/etc/prometheus/prometheus-core.yml'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
@@ -241,7 +241,7 @@ services:
       - './config/prometheus/:/etc/prometheus/'
 
   prometheus_databases:
-    image: 'prom/prometheus:v2.3.2'
+    image: 'prom/prometheus:v2.5.0'
     command:
       - '--config.file=/etc/prometheus/prometheus-databases.yml'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
@@ -267,7 +267,7 @@ services:
       - './config/prometheus/:/etc/prometheus/'
 
   prometheus_nodes:
-    image: 'prom/prometheus:v2.3.2'
+    image: 'prom/prometheus:v2.5.0'
     command:
       - '--config.file=/etc/prometheus/prometheus-nodes.yml'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
@@ -296,7 +296,7 @@ services:
       - '/:/rootfs:ro'
 
   prometheus_services:
-    image: 'prom/prometheus:v2.3.2'
+    image: 'prom/prometheus:v2.5.0'
     command:
       - '--config.file=/etc/prometheus/prometheus-services.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -322,7 +322,7 @@ services:
       - './config/prometheus/:/etc/prometheus/'
 
   push_gateway:
-    image: 'prom/pushgateway:v0.5.2'
+    image: 'prom/pushgateway:v0.7.0'
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
