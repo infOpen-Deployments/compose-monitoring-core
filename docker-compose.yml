@@ -172,7 +172,7 @@ services:
       - 'services'
 
   influxdb:
-    image: 'influxdb:1.7.2'
+    image: 'influxdb:1.6.4'
     logging:
       driver: 'json-file'
       options:
