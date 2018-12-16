@@ -182,6 +182,8 @@ services:
     expose:
       - 4242
       - 8086
+    ports:
+      - "${LISTEN_IP_ADDRESS}:4242:4242"
     volumes:
       - 'influxdb_data:/var/lib/influxdb'
       - './config/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf'
