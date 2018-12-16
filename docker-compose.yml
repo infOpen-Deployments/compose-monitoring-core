@@ -24,8 +24,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     expose:
       - 9093
     volumes:
@@ -46,8 +46,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     expose:
       - 9115
     ports:
@@ -68,8 +68,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     expose:
       - 8888
     networks:
@@ -81,8 +81,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     restart: 'unless-stopped'
     volumes:
       - 'postgres_data:/var/lib/postgresql/data'
@@ -100,8 +100,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     networks:
       - 'monitoring_core'
     volumes:
@@ -120,8 +120,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     volumes:
       - 'grafana_data:/var/lib/grafana'
       - './config/grafana/ldap/ldap.toml:/etc/grafana/ldap.toml'
@@ -176,8 +176,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     restart: 'unless-stopped'
     expose:
       - 4242
@@ -199,8 +199,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     command:
       - '--influx.url=http://influxdb:8086'
     restart: 'unless-stopped'
@@ -223,8 +223,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     expose:
       - 9090
     networks:
@@ -252,8 +252,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     expose:
       - 9090
     networks:
@@ -278,8 +278,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     expose:
       - 9090
     networks:
@@ -307,8 +307,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     expose:
       - 9090
     networks:
@@ -327,8 +327,8 @@ services:
     logging:
       driver: 'json-file'
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "${LOGGING_MAX_SIZE}"
+        max-file: "${LOGGING_MAX_FILE}"
     expose:
       - 9091
     ports:
