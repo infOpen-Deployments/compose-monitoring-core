@@ -14,8 +14,12 @@ volumes:
   chronograf_data: {}
   grafana_data: {}
   influxdb_data: {}
-  prometheus_data: {}
   postgres_data: {}
+  prometheus_core_data: {}
+  prometheus_databases_data: {}
+  prometheus_nodes_data: {}
+  prometheus_services_data: {}
+
 
 services:
   alertmanager:
@@ -32,6 +36,7 @@ services:
       - 'alertmanager_data:/alertmanager'
       - './config/alertmanager/config.yml:/etc/alertmanager/config.yml:ro'
       - '/etc/ssl/certs:/etc/ssl/certs:ro'
+      - '/etc/pki:/etc/pki:ro'
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
@@ -217,6 +222,8 @@ services:
     image: 'prom/prometheus:v2.5.0'
     command:
       - '--config.file=/etc/prometheus/prometheus-core.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=1h'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
@@ -241,11 +248,14 @@ services:
           - 'services.prometheus'
     volumes:
       - './config/prometheus/:/etc/prometheus/'
+      - 'prometheus_core_data:/prometheus/'
 
   prometheus_databases:
     image: 'prom/prometheus:v2.5.0'
     command:
       - '--config.file=/etc/prometheus/prometheus-databases.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=1h'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
@@ -267,11 +277,14 @@ services:
           - 'prometheus_servers.databases'
     volumes:
       - './config/prometheus/:/etc/prometheus/'
+      - 'prometheus_databases_data:/prometheus/'
 
   prometheus_nodes:
     image: 'prom/prometheus:v2.5.0'
     command:
       - '--config.file=/etc/prometheus/prometheus-nodes.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=1h'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
@@ -293,15 +306,14 @@ services:
           - 'prometheus_servers.nodes'
     volumes:
       - './config/prometheus/:/etc/prometheus/'
-      - '/proc:/host/proc:ro'
-      - '/sys:/host/sys:ro'
-      - '/:/rootfs:ro'
+      - 'prometheus_nodes_data:/prometheus/'
 
   prometheus_services:
     image: 'prom/prometheus:v2.5.0'
     command:
       - '--config.file=/etc/prometheus/prometheus-services.yml'
       - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=1h'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
@@ -322,6 +334,7 @@ services:
           - 'prometheus_servers.services'
     volumes:
       - './config/prometheus/:/etc/prometheus/'
+      - 'prometheus_services_data:/prometheus/'
 
   push_gateway:
     image: 'prom/pushgateway:v0.7.0'
