@@ -24,6 +24,10 @@ volumes:
 services:
   alertmanager:
     image: 'bitnami/alertmanager:latest'
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://127.0.0.1:9093'
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -37,10 +41,6 @@ services:
       - './config/alertmanager/config.yml:/etc/alertmanager/config.yml:ro'
       - '/etc/ssl/certs:/etc/ssl/certs:ro'
       - '/etc/pki:/etc/pki:ro'
-    command:
-      - '--config.file=/etc/alertmanager/config.yml'
-      - '--storage.path=/alertmanager'
-      - '--web.external-url=http://127.0.0.1:9093'
     networks:
       - 'monitoring_core'
       - 'services'
@@ -55,20 +55,18 @@ services:
         max-file: "${LOGGING_MAX_FILE}"
     expose:
       - 9115
+    networks:
+      - 'monitoring_core'
+      - 'services'
     ports:
         - "${LISTEN_IP_ADDRESS}:9115:9115"
     volumes:
       - './config/blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml:ro'
-    networks:
-      - 'monitoring_core'
-      - 'services'
 
   chronograf:
     image: 'chronograf:1.7.4'
     command:
       - '--influxdb-url=http://influxdb:8086'
-    volumes:
-      - 'chronograf_data:/var/lib/chronograf'
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -80,23 +78,25 @@ services:
     networks:
       - 'monitoring_core'
       - 'services'
+    volumes:
+      - 'chronograf_data:/var/lib/chronograf'
 
   postgres:
     image: 'postgres:10.2-alpine'
+    restart: 'unless-stopped'
     logging:
       driver: 'json-file'
       options:
         max-size: "${LOGGING_MAX_SIZE}"
         max-file: "${LOGGING_MAX_FILE}"
-    restart: 'unless-stopped'
-    volumes:
-      - 'postgres_data:/var/lib/postgresql/data'
-    networks:
-      - 'monitoring_core'
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - 'monitoring_core'
+    volumes:
+      - 'postgres_data:/var/lib/postgresql/data'
 
   backup:
     build:
@@ -107,10 +107,6 @@ services:
       options:
         max-size: "${LOGGING_MAX_SIZE}"
         max-file: "${LOGGING_MAX_FILE}"
-    networks:
-      - 'monitoring_core'
-    volumes:
-      - './backup.sh:/backup.sh'
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -119,9 +115,14 @@ services:
       - FTP_HOST=${FTP_HOST}
       - FTP_USER=${FTP_USER}
       - FTP_PASSWORD=${FTP_PASSWORD}
+    networks:
+      - 'monitoring_core'
+    volumes:
+      - './backup.sh:/backup.sh'
 
   grafana:
     image: 'grafana/grafana:5.4.2'
+    restart: 'unless-stopped'
     logging:
       driver: 'json-file'
       options:
@@ -169,7 +170,6 @@ services:
       - GF_DATABASE_USER=${POSTGRES_USER}
       - GF_DATABASE_PASSWORD=${POSTGRES_PASSWORD}
       - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel,grafana-worldmap-panel,percona-percona-app,stagemonitor-elasticsearch-app,btplc-alarm-box-panel,novalabs-annotations-panel,grafana-azure-monitor-datasource,digiapulssi-breadcrumb-panel,jdbranham-diagram-panel,natel-discrete-panel,ddurieux-glpi-app,natel-influx-admin-panel,grafana-kubernetes-app,camptocamp-prometheus-alertmanager-datasource,fzakaria-simple-annotations-datasource,grafana-simple-json-datasource
-    restart: 'unless-stopped'
     expose:
       - 3000
     networks:
@@ -178,39 +178,39 @@ services:
 
   influxdb:
     image: 'influxdb:1.6.4'
+    command:
+      - 'influxd'
+      - '-config'
+      - '/etc/influxdb/influxdb.conf'
+    restart: 'unless-stopped'
     logging:
       driver: 'json-file'
       options:
         max-size: "${LOGGING_MAX_SIZE}"
         max-file: "${LOGGING_MAX_FILE}"
-    restart: 'unless-stopped'
+    environment:
+      INFLUXDB_DB: 'prometheus'
     expose:
       - 4242
       - 8086
+    networks:
+      - 'monitoring_core'
     ports:
       - "${LISTEN_IP_ADDRESS}:4242:4242"
     volumes:
       - 'influxdb_data:/var/lib/influxdb'
       - './config/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf'
-    command:
-      - 'influxd'
-      - '-config'
-      - '/etc/influxdb/influxdb.conf'
-    environment:
-      INFLUXDB_DB: 'prometheus'
-    networks:
-      - 'monitoring_core'
 
   influxdb_exporter:
     image: 'carlpett/influxdb_stats_exporter:latest'
+    command:
+      - '--influx.url=http://influxdb:8086'
+    restart: 'unless-stopped'
     logging:
       driver: 'json-file'
       options:
         max-size: "${LOGGING_MAX_SIZE}"
         max-file: "${LOGGING_MAX_FILE}"
-    command:
-      - '--influx.url=http://influxdb:8086'
-    restart: 'unless-stopped'
     expose:
       - 9424
     ports:
