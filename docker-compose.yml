@@ -23,7 +23,7 @@ volumes:
 
 services:
   alertmanager:
-    image: 'bitnami/alertmanager:latest'
+    image: "${ALERT_MANAGER_IMAGE_NAME}:${ALERT_MANAGER_IMAGE_VERSION}"
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
@@ -46,7 +46,7 @@ services:
       - 'services'
 
   blackbox_exporter:
-    image: 'prom/blackbox-exporter:v0.13.0'
+    image: "${BLACKBOX_EXPORTER_IMAGE_NAME}:${BLACKBOX_EXPORTER_IMAGE_VERSION}"
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -64,7 +64,7 @@ services:
       - './config/blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml:ro'
 
   chronograf:
-    image: 'chronograf:1.7.4'
+    image: "${CHRONOGRAF_IMAGE_NAME}:${CHRONOGRAF_IMAGE_VERSION}"
     command:
       - '--influxdb-url=http://influxdb:8086'
     restart: 'unless-stopped'
@@ -82,7 +82,7 @@ services:
       - 'chronograf_data:/var/lib/chronograf'
 
   postgres:
-    image: 'postgres:10.2-alpine'
+    image: "${POSTGRES_IMAGE_NAME}:${POSTGRES_IMAGE_VERSION}"
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -121,7 +121,7 @@ services:
       - './backup.sh:/backup.sh'
 
   grafana:
-    image: 'grafana/grafana:5.4.2'
+    image: "${GRAFANA_IMAGE_NAME}:${GRAFANA_IMAGE_VERSION}"
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -177,7 +177,7 @@ services:
       - 'services'
 
   influxdb:
-    image: 'influxdb:1.6.4'
+    image: "${INFLUXDB_IMAGE_NAME}:${INFLUXDB_IMAGE_VERSION}"
     command:
       - 'influxd'
       - '-config'
@@ -202,7 +202,7 @@ services:
       - './config/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf'
 
   influxdb_exporter:
-    image: 'carlpett/influxdb_stats_exporter:latest'
+    image: "${INFLUXDB_EXPORTER_IMAGE_NAME}:${INFLUXDB_EXPORTER_IMAGE_VERSION}"
     command:
       - '--influx.url=http://influxdb:8086'
     restart: 'unless-stopped'
@@ -219,7 +219,7 @@ services:
       - 'monitoring_core'
 
   prometheus_core:
-    image: 'prom/prometheus:v2.5.0'
+    image: "${PROMETHEUS_IMAGE_NAME}:${PROMETHEUS_IMAGE_VERSION}"
     command:
       - '--config.file=/etc/prometheus/prometheus-core.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -251,7 +251,7 @@ services:
       - 'prometheus_core_data:/prometheus/'
 
   prometheus_databases:
-    image: 'prom/prometheus:v2.5.0'
+    image: "${PROMETHEUS_IMAGE_NAME}:${PROMETHEUS_IMAGE_VERSION}"
     command:
       - '--config.file=/etc/prometheus/prometheus-databases.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -280,7 +280,7 @@ services:
       - 'prometheus_databases_data:/prometheus/'
 
   prometheus_nodes:
-    image: 'prom/prometheus:v2.5.0'
+    image: "${PROMETHEUS_IMAGE_NAME}:${PROMETHEUS_IMAGE_VERSION}"
     command:
       - '--config.file=/etc/prometheus/prometheus-nodes.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -309,7 +309,7 @@ services:
       - 'prometheus_nodes_data:/prometheus/'
 
   prometheus_services:
-    image: 'prom/prometheus:v2.5.0'
+    image: "${PROMETHEUS_IMAGE_NAME}:${PROMETHEUS_IMAGE_VERSION}"
     command:
       - '--config.file=/etc/prometheus/prometheus-services.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -337,7 +337,7 @@ services:
       - 'prometheus_services_data:/prometheus/'
 
   push_gateway:
-    image: 'prom/pushgateway:v0.7.0'
+    image: "${PUSH_GATEWAY_IMAGE_NAME}:${PUSH_GATEWAY_IMAGE_VERSION}"
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
