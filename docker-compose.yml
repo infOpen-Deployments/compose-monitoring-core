@@ -23,7 +23,11 @@ volumes:
 
 services:
   alertmanager:
-    image: 'bitnami/alertmanager:latest'
+    image: "${ALERT_MANAGER_IMAGE_NAME}:${ALERT_MANAGER_IMAGE_VERSION}"
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://127.0.0.1:9093'
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -37,16 +41,12 @@ services:
       - './config/alertmanager/config.yml:/etc/alertmanager/config.yml:ro'
       - '/etc/ssl/certs:/etc/ssl/certs:ro'
       - '/etc/pki:/etc/pki:ro'
-    command:
-      - '--config.file=/etc/alertmanager/config.yml'
-      - '--storage.path=/alertmanager'
-      - '--web.external-url=http://127.0.0.1:9093'
     networks:
       - 'monitoring_core'
       - 'services'
 
   blackbox_exporter:
-    image: 'prom/blackbox-exporter:v0.13.0'
+    image: "${BLACKBOX_EXPORTER_IMAGE_NAME}:${BLACKBOX_EXPORTER_IMAGE_VERSION}"
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -55,20 +55,18 @@ services:
         max-file: "${LOGGING_MAX_FILE}"
     expose:
       - 9115
+    networks:
+      - 'monitoring_core'
+      - 'services'
     ports:
         - "${LISTEN_IP_ADDRESS}:9115:9115"
     volumes:
       - './config/blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml:ro'
-    networks:
-      - 'monitoring_core'
-      - 'services'
 
   chronograf:
-    image: 'chronograf:1.7.4'
+    image: "${CHRONOGRAF_IMAGE_NAME}:${CHRONOGRAF_IMAGE_VERSION}"
     command:
       - '--influxdb-url=http://influxdb:8086'
-    volumes:
-      - 'chronograf_data:/var/lib/chronograf'
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -80,48 +78,27 @@ services:
     networks:
       - 'monitoring_core'
       - 'services'
+    volumes:
+      - 'chronograf_data:/var/lib/chronograf'
 
   postgres:
-    image: 'postgres:10.2-alpine'
+    image: "${POSTGRES_IMAGE_NAME}:${POSTGRES_IMAGE_VERSION}"
+    restart: 'unless-stopped'
     logging:
       driver: 'json-file'
       options:
         max-size: "${LOGGING_MAX_SIZE}"
         max-file: "${LOGGING_MAX_FILE}"
-    restart: 'unless-stopped'
+    env_file:
+      - './env/postgres.env'
+    networks:
+      - 'monitoring_core'
     volumes:
       - 'postgres_data:/var/lib/postgresql/data'
-    networks:
-      - 'monitoring_core'
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-
-  backup:
-    build:
-      context: './docker/backup'
-    restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
-    networks:
-      - 'monitoring_core'
-    volumes:
-      - './backup.sh:/backup.sh'
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - SERVICE_NAME=${SERVICE_NAME}
-      - FTP_HOST=${FTP_HOST}
-      - FTP_USER=${FTP_USER}
-      - FTP_PASSWORD=${FTP_PASSWORD}
 
   grafana:
-    image: 'grafana/grafana:5.4.2'
+    image: "${GRAFANA_IMAGE_NAME}:${GRAFANA_IMAGE_VERSION}"
+    restart: 'unless-stopped'
     logging:
       driver: 'json-file'
       options:
@@ -155,21 +132,8 @@ services:
       - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_Table_Statistics.json:/var/lib/grafana/dashboards/databases/MySQL_Table_Statistics.json'
       - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_TokuDB_Metrics.json:/var/lib/grafana/dashboards/databases/MySQL_TokuDB_Metrics.json'
       - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_User_Statistics.json:/var/lib/grafana/dashboards/databases/MySQL_User_Statistics.json'
-    environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=false
-      - GF_AUTH_DISABLE_LOGIN_FORM=false
-      - GF_AUTH_DISABLE_SIGNOUT_MENU=false
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_AUTH_LDAP_ENABLED=true
-      - GF_AUTH_LDAP_CONFIG_FILE=/etc/grafana/ldap.toml
-      - GF_AUTH_LDAP_ALLOW_SIGN_UP=true
-      - GF_DATABASE_TYPE=postgres
-      - GF_DATABASE_HOST=postgres:5432
-      - GF_DATABASE_NAME=${POSTGRES_DB}
-      - GF_DATABASE_USER=${POSTGRES_USER}
-      - GF_DATABASE_PASSWORD=${POSTGRES_PASSWORD}
-      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel,grafana-worldmap-panel,percona-percona-app,stagemonitor-elasticsearch-app,btplc-alarm-box-panel,novalabs-annotations-panel,grafana-azure-monitor-datasource,digiapulssi-breadcrumb-panel,jdbranham-diagram-panel,natel-discrete-panel,ddurieux-glpi-app,natel-influx-admin-panel,grafana-kubernetes-app,camptocamp-prometheus-alertmanager-datasource,fzakaria-simple-annotations-datasource,grafana-simple-json-datasource
-    restart: 'unless-stopped'
+    env_file:
+      - './env/grafana.env'
     expose:
       - 3000
     networks:
@@ -177,40 +141,40 @@ services:
       - 'services'
 
   influxdb:
-    image: 'influxdb:1.6.4'
+    image: "${INFLUXDB_IMAGE_NAME}:${INFLUXDB_IMAGE_VERSION}"
+    command:
+      - 'influxd'
+      - '-config'
+      - '/etc/influxdb/influxdb.conf'
+    restart: 'unless-stopped'
     logging:
       driver: 'json-file'
       options:
         max-size: "${LOGGING_MAX_SIZE}"
         max-file: "${LOGGING_MAX_FILE}"
-    restart: 'unless-stopped'
+    env_file:
+      - 'env/influxdb.env'
     expose:
       - 4242
       - 8086
+    networks:
+      - 'monitoring_core'
     ports:
       - "${LISTEN_IP_ADDRESS}:4242:4242"
     volumes:
       - 'influxdb_data:/var/lib/influxdb'
       - './config/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf'
-    command:
-      - 'influxd'
-      - '-config'
-      - '/etc/influxdb/influxdb.conf'
-    environment:
-      INFLUXDB_DB: 'prometheus'
-    networks:
-      - 'monitoring_core'
 
   influxdb_exporter:
-    image: 'carlpett/influxdb_stats_exporter:latest'
+    image: "${INFLUXDB_EXPORTER_IMAGE_NAME}:${INFLUXDB_EXPORTER_IMAGE_VERSION}"
+    command:
+      - '--influx.url=http://influxdb:8086'
+    restart: 'unless-stopped'
     logging:
       driver: 'json-file'
       options:
         max-size: "${LOGGING_MAX_SIZE}"
         max-file: "${LOGGING_MAX_FILE}"
-    command:
-      - '--influx.url=http://influxdb:8086'
-    restart: 'unless-stopped'
     expose:
       - 9424
     ports:
@@ -219,7 +183,7 @@ services:
       - 'monitoring_core'
 
   prometheus_core:
-    image: 'prom/prometheus:v2.5.0'
+    image: "${PROMETHEUS_IMAGE_NAME}:${PROMETHEUS_IMAGE_VERSION}"
     command:
       - '--config.file=/etc/prometheus/prometheus-core.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -251,7 +215,7 @@ services:
       - 'prometheus_core_data:/prometheus/'
 
   prometheus_databases:
-    image: 'prom/prometheus:v2.5.0'
+    image: "${PROMETHEUS_IMAGE_NAME}:${PROMETHEUS_IMAGE_VERSION}"
     command:
       - '--config.file=/etc/prometheus/prometheus-databases.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -280,7 +244,7 @@ services:
       - 'prometheus_databases_data:/prometheus/'
 
   prometheus_nodes:
-    image: 'prom/prometheus:v2.5.0'
+    image: "${PROMETHEUS_IMAGE_NAME}:${PROMETHEUS_IMAGE_VERSION}"
     command:
       - '--config.file=/etc/prometheus/prometheus-nodes.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -309,7 +273,7 @@ services:
       - 'prometheus_nodes_data:/prometheus/'
 
   prometheus_services:
-    image: 'prom/prometheus:v2.5.0'
+    image: "${PROMETHEUS_IMAGE_NAME}:${PROMETHEUS_IMAGE_VERSION}"
     command:
       - '--config.file=/etc/prometheus/prometheus-services.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -337,7 +301,7 @@ services:
       - 'prometheus_services_data:/prometheus/'
 
   push_gateway:
-    image: 'prom/pushgateway:v0.7.0'
+    image: "${PUSH_GATEWAY_IMAGE_NAME}:${PUSH_GATEWAY_IMAGE_VERSION}"
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
