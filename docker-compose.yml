@@ -96,23 +96,6 @@ services:
     volumes:
       - 'postgres_data:/var/lib/postgresql/data'
 
-  backup:
-    build:
-      context: './docker/backup'
-    restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
-    env_file:
-      - './env/backup.env'
-      - './env/postgres.env'
-    networks:
-      - 'monitoring_core'
-    volumes:
-      - './backup.sh:/backup.sh'
-
   grafana:
     image: "${GRAFANA_IMAGE_NAME}:${GRAFANA_IMAGE_VERSION}"
     restart: 'unless-stopped'
