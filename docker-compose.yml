@@ -89,10 +89,8 @@ services:
       options:
         max-size: "${LOGGING_MAX_SIZE}"
         max-file: "${LOGGING_MAX_FILE}"
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+    env_file:
+      - './env/postgres.env'
     networks:
       - 'monitoring_core'
     volumes:
@@ -107,14 +105,9 @@ services:
       options:
         max-size: "${LOGGING_MAX_SIZE}"
         max-file: "${LOGGING_MAX_FILE}"
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - SERVICE_NAME=${SERVICE_NAME}
-      - FTP_HOST=${FTP_HOST}
-      - FTP_USER=${FTP_USER}
-      - FTP_PASSWORD=${FTP_PASSWORD}
+    env_file:
+      - './env/backup.env'
+      - './env/postgres.env'
     networks:
       - 'monitoring_core'
     volumes:
@@ -156,20 +149,8 @@ services:
       - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_Table_Statistics.json:/var/lib/grafana/dashboards/databases/MySQL_Table_Statistics.json'
       - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_TokuDB_Metrics.json:/var/lib/grafana/dashboards/databases/MySQL_TokuDB_Metrics.json'
       - './vendor/github.com/percona/grafana-dashboards/dashboards/MySQL_User_Statistics.json:/var/lib/grafana/dashboards/databases/MySQL_User_Statistics.json'
-    environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=false
-      - GF_AUTH_DISABLE_LOGIN_FORM=false
-      - GF_AUTH_DISABLE_SIGNOUT_MENU=false
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_AUTH_LDAP_ENABLED=true
-      - GF_AUTH_LDAP_CONFIG_FILE=/etc/grafana/ldap.toml
-      - GF_AUTH_LDAP_ALLOW_SIGN_UP=true
-      - GF_DATABASE_TYPE=postgres
-      - GF_DATABASE_HOST=postgres:5432
-      - GF_DATABASE_NAME=${POSTGRES_DB}
-      - GF_DATABASE_USER=${POSTGRES_USER}
-      - GF_DATABASE_PASSWORD=${POSTGRES_PASSWORD}
-      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel,grafana-worldmap-panel,percona-percona-app,stagemonitor-elasticsearch-app,btplc-alarm-box-panel,novalabs-annotations-panel,grafana-azure-monitor-datasource,digiapulssi-breadcrumb-panel,jdbranham-diagram-panel,natel-discrete-panel,ddurieux-glpi-app,natel-influx-admin-panel,grafana-kubernetes-app,camptocamp-prometheus-alertmanager-datasource,fzakaria-simple-annotations-datasource,grafana-simple-json-datasource
+    env_file:
+      - './env/grafana.env'
     expose:
       - 3000
     networks:
@@ -188,8 +169,8 @@ services:
       options:
         max-size: "${LOGGING_MAX_SIZE}"
         max-file: "${LOGGING_MAX_FILE}"
-    environment:
-      INFLUXDB_DB: 'prometheus'
+    env_file:
+      - 'env/influxdb.env'
     expose:
       - 4242
       - 8086
