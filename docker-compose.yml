@@ -1,6 +1,13 @@
 ---
 
-version: '3'
+version: '3.4'
+
+x-logging:
+  &default-logging
+  driver: 'json-file'
+  options:
+    max-size: "${LOGGING_MAX_SIZE}"
+    max-file: "${LOGGING_MAX_FILE}"
 
 networks:
   monitoring_core: {}
@@ -29,11 +36,7 @@ services:
       - '--storage.path=/alertmanager'
       - '--web.external-url=http://127.0.0.1:9093'
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     expose:
       - 9093
     volumes:
@@ -48,11 +51,7 @@ services:
   blackbox_exporter:
     image: "${BLACKBOX_EXPORTER_IMAGE_NAME}:${BLACKBOX_EXPORTER_IMAGE_VERSION}"
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     expose:
       - 9115
     networks:
@@ -68,11 +67,7 @@ services:
     command:
       - '--influxdb-url=http://influxdb:8086'
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     expose:
       - 8888
     networks:
@@ -84,11 +79,7 @@ services:
   postgres:
     image: "${POSTGRES_IMAGE_NAME}:${POSTGRES_IMAGE_VERSION}"
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     env_file:
       - './env/postgres.env'
     networks:
@@ -99,11 +90,7 @@ services:
   grafana:
     image: "${GRAFANA_IMAGE_NAME}:${GRAFANA_IMAGE_VERSION}"
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     volumes:
       - 'grafana_data:/var/lib/grafana'
       - './config/grafana/ldap/ldap.toml:/etc/grafana/ldap.toml'
@@ -147,11 +134,7 @@ services:
       - '-config'
       - '/etc/influxdb/influxdb.conf'
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     env_file:
       - 'env/influxdb.env'
     expose:
@@ -170,11 +153,7 @@ services:
     command:
       - '--influx.url=http://influxdb:8086'
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     expose:
       - 9424
     ports:
@@ -193,11 +172,7 @@ services:
       - '--web.enable-lifecycle'
       - '--web.external-url=http://127.0.0.1:9090'
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     expose:
       - 9090
     networks:
@@ -225,11 +200,7 @@ services:
       - '--web.enable-lifecycle'
       - '--web.external-url=http://0.0.0.0:9090'
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     expose:
       - 9090
     networks:
@@ -254,11 +225,7 @@ services:
       - '--web.enable-lifecycle'
       - '--web.external-url=http://0.0.0.0:9090'
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     expose:
       - 9090
     networks:
@@ -282,11 +249,7 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     expose:
       - 9090
     networks:
@@ -303,11 +266,7 @@ services:
   push_gateway:
     image: "${PUSH_GATEWAY_IMAGE_NAME}:${PUSH_GATEWAY_IMAGE_VERSION}"
     restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: "${LOGGING_MAX_SIZE}"
-        max-file: "${LOGGING_MAX_FILE}"
+    logging: *default-logging
     expose:
       - 9091
     ports:
