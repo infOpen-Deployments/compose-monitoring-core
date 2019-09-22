@@ -1,0 +1,11 @@
+---
+
+client-id: 'pushgateway'
+client-secret: '3f33efc6-cb85-4122-8d63-22c2a2731c5b'
+discovery-url: 'http://192.168.1.82:8080/auth/realms/test'
+redirection-url: 'http://pushgateway.localhost/'
+enable-default-deny: true
+encryption_key: AgXa7xRcoClDEU0ZDSH4X0XhL5Qy2Z2j
+listen: 0.0.0.0:3000
+upstream-url: http://pushgateway:9091
+secure-cookie: false

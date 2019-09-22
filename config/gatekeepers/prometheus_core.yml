@@ -1,0 +1,11 @@
+---
+
+client-id: 'prometheus_core'
+client-secret: '5f725194-4297-4ddf-8467-958b372a7b90'
+discovery-url: 'http://192.168.1.82:8080/auth/realms/test'
+redirection-url: 'http://prometheus-core.localhost/'
+enable-default-deny: true
+encryption_key: AgXa7xRcoClDEU0ZDSH4X0XhL5Qy2Z2j
+listen: 0.0.0.0:3000
+upstream-url: http://prometheus_core:9090
+secure-cookie: false

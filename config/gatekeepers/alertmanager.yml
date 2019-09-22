@@ -1,0 +1,11 @@
+---
+
+client-id: 'alertmanager'
+client-secret: 'cef5fa51-ab1e-4f5a-9d7a-8efeb0008af7'
+discovery-url: 'http://192.168.1.82:8080/auth/realms/test'
+redirection-url: 'http://alertmanager.localhost/'
+enable-default-deny: true
+encryption_key: AgXa7xRcoClDEU0ZDSH4X0XhL5Qy2Z2j
+listen: 0.0.0.0:3000
+upstream-url: http://alertmanager:9093
+secure-cookie: false
