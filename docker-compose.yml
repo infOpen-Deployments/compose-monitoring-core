@@ -57,8 +57,6 @@ services:
     networks:
       - 'monitoring_core'
       - 'services'
-    ports:
-        - "${LISTEN_IP_ADDRESS}:9115:9115"
     volumes:
       - './config/blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml:ro'
 
@@ -142,8 +140,6 @@ services:
       - 8086
     networks:
       - 'monitoring_core'
-    ports:
-      - "${LISTEN_IP_ADDRESS}:4242:4242"
     volumes:
       - 'influxdb_data:/var/lib/influxdb'
       - './config/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf'
@@ -156,8 +152,6 @@ services:
     logging: *default-logging
     expose:
       - 9424
-    ports:
-      - "${LISTEN_IP_ADDRESS}:9424:9424"
     networks:
       - 'monitoring_core'
 
