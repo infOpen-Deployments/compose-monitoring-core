@@ -1,0 +1,11 @@
+---
+
+client-id: 'chronograf'
+client-secret: 'a92f157f-b9c2-496c-a60b-25b48d3eb193'
+discovery-url: 'http://192.168.1.82:8080/auth/realms/test'
+redirection-url: 'http://chronograf.localhost/'
+enable-default-deny: true
+encryption_key: AgXa7xRcoClDEU0ZDSH4X0XhL5Qy2Z2j
+listen: 0.0.0.0:3000
+upstream-url: http://chronograf:8888
+secure-cookie: false

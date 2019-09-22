@@ -1,0 +1,67 @@
+---
+
+version: '3.4'
+
+x-logging:
+  &default-logging
+  driver: 'json-file'
+  options:
+    max-size: "${LOGGING_MAX_SIZE}"
+    max-file: "${LOGGING_MAX_FILE}"
+
+services:
+  alertmanager_gatekeeper:
+    image: "${KEYCLOAK_GATEKEEPER_IMAGE_NAME}:${KEYCLOAK_GATEKEEPER_IMAGE_VERSION}"
+    command:
+      - '--config=/etc/gatekeeper.yml'
+    restart: 'unless-stopped'
+    logging: *default-logging
+    expose:
+      - '3000'
+    networks:
+      - 'monitoring_core'
+      - 'services'
+    volumes:
+      - './config/gatekeepers/alertmanager.yml:/etc/gatekeeper.yml'
+
+  chronograf_gatekeeper:
+    image: "${KEYCLOAK_GATEKEEPER_IMAGE_NAME}:${KEYCLOAK_GATEKEEPER_IMAGE_VERSION}"
+    command:
+      - '--config=/etc/gatekeeper.yml'
+    restart: 'unless-stopped'
+    logging: *default-logging
+    expose:
+      - '3000'
+    networks:
+      - 'monitoring_core'
+      - 'services'
+    volumes:
+      - './config/gatekeepers/chronograf.yml:/etc/gatekeeper.yml'
+
+  prometheus_core_gatekeeper:
+    image: "${KEYCLOAK_GATEKEEPER_IMAGE_NAME}:${KEYCLOAK_GATEKEEPER_IMAGE_VERSION}"
+    command:
+      - '--config=/etc/gatekeeper.yml'
+    restart: 'unless-stopped'
+    logging: *default-logging
+    expose:
+      - '3000'
+    networks:
+      - 'monitoring_core'
+      - 'services'
+    volumes:
+      - './config/gatekeepers/prometheus_core.yml:/etc/gatekeeper.yml'
+
+  pushgateway_gatekeeper:
+    image: "${KEYCLOAK_GATEKEEPER_IMAGE_NAME}:${KEYCLOAK_GATEKEEPER_IMAGE_VERSION}"
+    command:
+      - '--config=/etc/gatekeeper.yml'
+    restart: 'unless-stopped'
+    logging: *default-logging
+    expose:
+      - '3000'
+    networks:
+      - 'monitoring_core'
+      - 'services'
+    volumes:
+      - './config/gatekeepers/pushgateway.yml:/etc/gatekeeper.yml'
