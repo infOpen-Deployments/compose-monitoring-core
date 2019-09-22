@@ -257,7 +257,7 @@ services:
       - './config/prometheus/:/etc/prometheus/'
       - 'prometheus_services_data:/prometheus/'
 
-  push_gateway:
+  pushgateway:
     image: "${PUSH_GATEWAY_IMAGE_NAME}:${PUSH_GATEWAY_IMAGE_VERSION}"
     restart: 'unless-stopped'
     logging: *default-logging
