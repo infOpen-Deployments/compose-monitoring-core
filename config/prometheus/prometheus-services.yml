@@ -55,5 +55,6 @@ scrape_configs:
           - 'prometheus_servers.services:9090'
 
   - job_name: 'push_gateway'
+    honor_labels: true
     static_configs:
       - targets: ['push_gateway:9091']
