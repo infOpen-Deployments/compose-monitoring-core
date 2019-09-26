@@ -85,6 +85,17 @@ services:
     volumes:
       - 'postgres_data:/var/lib/postgresql/data'
 
+  postgres_exporter:
+    image: "${POSTGRES_EXPORTER_IMAGE_NAME}:${POSTGRES_EXPORTER_IMAGE_VERSION}"
+    restart: 'unless-stopped'
+    logging: *default-logging
+    env_file:
+      - './env/postgres_exporter.env'
+    networks:
+      - 'monitoring_core'
+    ports:
+      - "${POSTGRES_EXPORTER_LISTEN_IP_ADDRESS}:9187:9187"
+
   grafana:
     image: "${GRAFANA_IMAGE_NAME}:${GRAFANA_IMAGE_VERSION}"
     restart: 'unless-stopped'
