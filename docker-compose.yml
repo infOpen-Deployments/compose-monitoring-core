@@ -91,7 +91,6 @@ services:
     logging: *default-logging
     volumes:
       - 'grafana_data:/var/lib/grafana'
-      - './config/grafana/ldap/ldap.toml:/etc/grafana/ldap.toml'
       - './config/grafana/provisionning/datasources:/etc/grafana/provisioning/datasources'
       - './config/grafana/provisionning/dashboards:/etc/grafana/provisioning/dashboards'
       - './config/grafana/dashboards:/var/lib/grafana/dashboards'
